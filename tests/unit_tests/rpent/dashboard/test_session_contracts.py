@@ -391,7 +391,7 @@ def test_dashboard_task_rejects_exploration_in_code_policy_mode(tmp_path: Path) 
         is_real_robot=False,
         parse_config=parse_config,
     )
-    args = SimpleNamespace(policy_mode="code", explore=False)
+    args = SimpleNamespace(policy_mode="code", planner="api", explore=False)
     claimed = ClaimedTask(
         number=1, request={"explore": True}, output_dir=tmp_path / "task"
     )

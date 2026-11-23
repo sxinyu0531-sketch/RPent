@@ -139,13 +139,9 @@ def test_toolkit_without_memory_keeps_finish_but_no_file_tools(
 
     assert toolkit.memory is None
     assert [definition.name for definition in toolkit.list_tools()] == ["finish"]
-    assert toolkit.execute_tool(
-        "read_text_file", {"path": "MEMORY.md"}
-    ).is_error
+    assert toolkit.execute_tool("read_text_file", {"path": "MEMORY.md"}).is_error
 
-    finished = toolkit.execute_tool(
-        "finish", {"status": "success", "summary": "done"}
-    )
+    finished = toolkit.execute_tool("finish", {"status": "success", "summary": "done"})
     assert finished.data["_finish"] is True
     assert not (tmp_path / "memory").exists()
 

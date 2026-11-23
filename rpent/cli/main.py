@@ -466,9 +466,15 @@ def main() -> int:
             "--base-url applies to the 'api' planner only; "
             f"{args.planner} uses its existing backend configuration instead"
         )
+    if args.policy_mode == "code" and args.planner not in {
+        "api",
+        "claude_code",
+        "codex",
+    }:
+        parser.error(
+            "--policy-mode code supports only the api, claude_code, and codex planners"
+        )
     if args.planner == "flash":
-        if args.policy_mode == "code":
-            parser.error("--policy-mode code cannot be used with --planner flash")
         if args.explore:
             parser.error("Flash Mode is evaluation-only; remove --explore")
         if robot_spec.run_flash is None:

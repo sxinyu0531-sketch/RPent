@@ -204,6 +204,12 @@ def _run_dashboard_task(
     task_args = copy.copy(args)
     for name, value in claimed.request.items():
         setattr(task_args, name, value)
+    if getattr(
+        task_args, "policy_mode", "tools"
+    ) == "code" and task_args.planner not in {"api", "claude_code", "codex"}:
+        raise ValueError(
+            "--policy-mode code supports only the api, claude_code, and codex planners"
+        )
     if task_args.explore and not robot_spec.supports_exploration:
         raise ValueError(f"--explore is not supported for robot {robot_spec.name!r}")
     if task_args.explore and getattr(task_args, "policy_mode", "tools") == "code":
