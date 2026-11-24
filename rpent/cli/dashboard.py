@@ -215,6 +215,13 @@ def _run_dashboard_task(
     if task_args.explore and getattr(task_args, "policy_mode", "tools") == "code":
         raise ValueError("--policy-mode code cannot be used with --explore")
     task_args.output_dir = str(claimed.output_dir)
+    if (
+        getattr(task_args, "policy_mode", "tools") == "code"
+        and not robot_spec.supports_code_policy
+    ):
+        raise ValueError(
+            f"--policy-mode code is not supported for robot {robot_spec.name!r}"
+        )
     run_config = robot_spec.parse_config(task_args)
     if getattr(task_args, "policy_mode", "tools") == "code":
         run_config = _disable_memory(run_config)

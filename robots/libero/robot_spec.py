@@ -159,6 +159,7 @@ def get_robot_spec() -> RobotSpec:
         init_runtime=_init_runtime,
         resolve_dashboard=_resolve_dashboard,
         flywheel=FLYWHEEL_CONFIG,
+        supports_code_policy=True,
         supports_exploration=True,
         run_flash=_run_flash,
         validate_args=validate_options,

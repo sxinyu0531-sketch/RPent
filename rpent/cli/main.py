@@ -474,6 +474,10 @@ def main() -> int:
         parser.error(
             "--policy-mode code supports only the api, claude_code, and codex planners"
         )
+    if args.policy_mode == "code" and not robot_spec.supports_code_policy:
+        parser.error(
+            f"--policy-mode code is not supported for robot {args.robot_name!r}"
+        )
     if args.planner == "flash":
         if args.explore:
             parser.error("Flash Mode is evaluation-only; remove --explore")

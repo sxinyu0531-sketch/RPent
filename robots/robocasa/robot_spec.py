@@ -219,6 +219,7 @@ def get_robot_spec() -> RobotSpec:
         init_runtime=_init_runtime,
         resolve_dashboard=lambda args: ROBOCASA_DASHBOARD_SPEC,
         flywheel=FLYWHEEL_CONFIG,
+        supports_code_policy=True,
         supports_exploration=True,
         finalize_run=finalize_cell_result,
         prepare_memory=prepare_memory,

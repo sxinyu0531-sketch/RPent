@@ -199,6 +199,7 @@ def get_robot_spec() -> RobotSpec:
         flywheel=FLYWHEEL_CONFIG,
         validate_args=_validate_args,
         finalize_run=finalize_run,
+        supports_code_policy=True,
         supports_exploration=True,
     )
 
