@@ -14,13 +14,18 @@
 
 """Code-policy instructions for franka."""
 
+from robots.franka.prompts import system as system_parts
 from rpent.prompt import code_policy as common
-from rpent.prompt.utils import PromptNode
+from rpent.prompt.utils import Numbered, PromptNode
 
 
 def system_prompt() -> dict[str, PromptNode]:
-    """Assemble code execution rules and franka operating knowledge."""
+    """Assemble code execution rules and Franka operating knowledge."""
     return {
         **common.system_prompt(),
+        "ROLE": system_parts.ROLE,
+        "RUNTIME": system_parts.RUNTIME,
+        "SAFETY RULES": Numbered(system_parts.RULES),
+        "WORKFLOW": Numbered(system_parts.WORKFLOW),
         "API reference": "{{code_policy_api}}",
     }

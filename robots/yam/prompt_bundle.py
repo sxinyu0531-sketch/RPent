@@ -20,7 +20,7 @@ from rpent.prompt.utils import PromptNode
 
 def system_prompt(variables: Mapping[str, object] | None = None) -> PromptNode:
     if (variables or {}).get("policy_mode") == "code":
-        return code_parts.system_prompt()
+        return code_parts.system_prompt(variables)
     policy = (
         system_parts.VLA
         if (variables or {}).get("vla_enabled", False)
