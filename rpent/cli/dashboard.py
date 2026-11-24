@@ -33,7 +33,7 @@ from rpent.code_policy.toolkit import CodePolicyTools
 from rpent.dashboard.events import RunStartedEvent
 from rpent.evaluation import RunFinalizationContext
 from rpent.memory import MemoryManager
-from rpent.planner.base import build_planner, is_recoverable_agent_error
+from rpent.planner.base import build_planner, is_recoverable_agent_error, resolve_model
 from rpent.prompt.code_policy import code_policy_api_reference
 from rpent.robots import get_toolkit
 from rpent.session.planner_capture import end_planner_task, start_planner_task
@@ -224,6 +224,7 @@ def _run_dashboard_task(
         )
     run_config = robot_spec.parse_config(task_args)
     if getattr(task_args, "policy_mode", "tools") == "code":
+        task_args.model = resolve_model(task_args.planner, task_args.model)
         run_config = _disable_memory(run_config)
     from rpent.memory.loading import prepare_run_memory
 
