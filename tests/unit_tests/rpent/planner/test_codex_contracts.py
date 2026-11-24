@@ -1063,6 +1063,109 @@ def test_finish_uses_accepted_tool_result_over_requested_success(
     assert recorder.tool_calls == 1
 
 
+@pytest.mark.parametrize("wrapped", [False, True])
+@pytest.mark.parametrize(
+    "payload, is_error, accepted",
+    [
+        pytest.param(
+            {"_finish": True, "status": "success", "summary": "done"},
+            False,
+            True,
+            id="accepted-success",
+        ),
+        pytest.param(
+            {"_finish": True, "status": "failure", "summary": "operator aborted"},
+            False,
+            True,
+            id="accepted-failure",
+        ),
+        pytest.param(
+            {"_finish": True, "status": "success"},
+            True,
+            False,
+            id="tool-error",
+        ),
+        pytest.param(
+            {"status": "pending"},
+            False,
+            False,
+            id="pending",
+        ),
+        pytest.param(
+            {"error": "finish refused"},
+            False,
+            False,
+            id="refused",
+        ),
+        pytest.param(
+            {"finished": False},
+            False,
+            False,
+            id="ordinary-cell",
+        ),
+    ],
+)
+def test_python_uses_actual_tool_verdict(wrapped, payload, is_error, accepted):
+    recorder = codex_module._Recorder(
+        max_turns=2,
+        dashboard_events=RecordingSink(),
+    )
+    result = (
+        {
+            "isError": is_error,
+            "content": [{"type": "text", "text": json.dumps(payload)}],
+        }
+        if wrapped
+        else payload
+    )
+
+    recorder.observe(
+        {
+            "method": "item/completed",
+            "payload": {
+                "item": {
+                    "type": "mcpToolCall",
+                    "tool": "mcp__rpent__python",
+                    "status": "failed" if is_error and not wrapped else "completed",
+                    "arguments": {
+                        "code": "robo.finish(status='success', summary='done')",
+                    },
+                    "result": result,
+                }
+            },
+        }
+    )
+
+    assert recorder.finish_result == (payload if accepted else None)
+    assert recorder.tool_calls == 1
+
+
+def test_python_without_result_does_not_fall_back_to_arguments():
+    recorder = codex_module._Recorder(
+        max_turns=2,
+        dashboard_events=RecordingSink(),
+    )
+
+    recorder.observe(
+        {
+            "method": "item/completed",
+            "payload": {
+                "item": {
+                    "type": "mcpToolCall",
+                    "tool": "mcp__rpent__python",
+                    "status": "completed",
+                    "arguments": {
+                        "code": "robo.finish(status='success', summary='done')",
+                    },
+                }
+            },
+        }
+    )
+
+    assert recorder.finish_result is None
+    assert recorder.tool_calls == 1
+
+
 def test_fake_codex_backend_failure_stops_mcp_server(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
