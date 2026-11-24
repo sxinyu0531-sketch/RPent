@@ -98,13 +98,20 @@ def test_worker_failure_or_timeout_allows_a_fresh_cell(policy, code):
     assert result["interrupted"] and result["namespace_reset"]
     assert result["timed_out"] is code.startswith("while")
     assert robot.cancel_count == 1
-    assert _run(provider, "print('x' in globals())")["stdout"] == "False\n"
+    provider._timeout_s = 5
+    recovered = _run(provider, "print('x' in globals())")
+    assert recovered["exception"] is None, recovered
+    assert recovered["stdout"] == "False\n", recovered
     assert _run(provider, "print(6 * 7)")["stdout"] == "42\n"
 
 
 @pytest.mark.parametrize("external", [False, True])
 def test_cancellation_drains_robot_and_external_stop_requires_resume(policy, external):
     provider, robot = policy
+    provider._timeout_s = 5
+    ready = _run(provider, "pass")
+    assert ready["exception"] is None, ready
+    assert not ready["interrupted"], ready
     provider._timeout_s = 5 if external else 0.5
     with ThreadPoolExecutor(max_workers=2) as pool:
         running = pool.submit(_run, provider, "x = 41\nrobo.block()")
@@ -128,6 +135,7 @@ def test_cancellation_drains_robot_and_external_stop_requires_resume(policy, ext
     if external:
         assert _run(provider, "42")["code"] == "tool_cancelled"
         provider.resume_calls()
+    provider._timeout_s = 5
     assert _run(provider, "print('x' in globals())")["stdout"] == "False\n"
 
 
@@ -155,6 +163,10 @@ def test_repeated_stop_notifies_once_until_resumed(tmp_path):
 
 def test_timeout_discards_already_queued_cells(policy):
     provider, robot = policy
+    provider._timeout_s = 5
+    ready = _run(provider, "pass")
+    assert ready["exception"] is None, ready
+    assert not ready["interrupted"], ready
     provider._timeout_s = 0.5
     with ThreadPoolExecutor(max_workers=2) as pool:
         running = pool.submit(_run, provider, "robo.block()")
@@ -170,6 +182,7 @@ def test_timeout_discards_already_queued_cells(policy):
             robot.release.set()
         assert running.result(timeout=3)["timed_out"]
         assert waiting.result(timeout=3)["code"] == "tool_cancelled"
+    provider._timeout_s = 5
     assert _run(provider, "print('stale' in globals())")["stdout"] == "False\n"
 
 
