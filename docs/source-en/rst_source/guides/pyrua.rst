@@ -59,6 +59,15 @@ using ``--code-timeout-s`` and ``--code-max-calls``, respectively.
 When ``robo.finish(...)`` successfully returns a completion marker,
 RPent terminates the current code cell and ends the planning session.
 
+.. warning::
+
+   Python cells are not sandboxed: they inherit environment variables,
+   including credentials, and can access files and networks within host
+   permissions. The scratch directory does not restrict file access;
+   persisted memory at ``<repo>/memory/<robot>`` remains readable when permitted,
+   even though PyRUA does not load it automatically. Timeout or cancellation
+   does not undo robot actions; stopping depends on the robot backend.
+   Check the current robot state before recovery.
 
 Inspect a Run
 -------------
